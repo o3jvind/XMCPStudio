@@ -1,0 +1,277 @@
+/* Sidebar items — jobs, sessions, notes */
+
+/* Job card */
+.job {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  gap: var(--space-2);
+}
+
+.job:hover {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.job.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--text-on-accent);
+}
+
+.job-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.job-name {
+  font-size: var(--font-size-sm);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.job-desc {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job.active .job-name { color: var(--text-on-accent); }
+.job.active .job-desc { color: var(--text-on-accent-muted); }
+
+/* Job ⋯ dropdown */
+.job-menu-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 2px;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0;
+  transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.job:hover .job-menu-btn { opacity: 1; }
+.job-menu-btn:hover { color: var(--text-primary); }
+.job.active .job-menu-btn { color: var(--text-on-accent-dim); opacity: 1; }
+
+/* Dropdown */
+.dropdown-menu {
+  position: absolute;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  display: none;
+  flex-direction: column;
+  box-shadow: var(--shadow-modal);
+  z-index: 999;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.dropdown-menu.open { display: flex; }
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  transition: background var(--transition-fast);
+}
+
+.dropdown-menu button:hover { background: var(--bg-card-hover); }
+
+.dropdown-menu button.danger { color: var(--color-danger); }
+.dropdown-menu button.danger:hover { background: var(--bg-hover-strong); }
+
+/* Session item */
+.session-item {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  overflow: visible;
+  margin-bottom: var(--space-1);
+}
+
+.session-title {
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.session-item:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.session-item.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-left: 2px solid var(--color-accent);
+  padding-left: calc(var(--space-3) - 2px);
+}
+
+/* Note item */
+.note-item {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.note-item:hover {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.note-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.note-title-row .job-menu-btn {
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+.note-item:hover .job-menu-btn { opacity: 1; }
+
+.note-title {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.note-desc {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  width: 100%;
+}
+
+.note-tag {
+  background: var(--bg-card-hover);
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+}
+
+/* Scope header */
+.scope-header {
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  padding: var(--space-3) var(--space-3) var(--space-1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: color var(--transition-fast);
+}
+
+.scope-header:hover { color: var(--text-secondary); }
+
+.scope-header .chevron {
+  transition: transform var(--transition-fast);
+  display: inline-block;
+}
+
+.scope-header.collapsed .chevron { transform: rotate(-90deg); }
+
+/* Drag reorder */
+.job.dragging { opacity: 0.25; cursor: grabbing; }
+.note-item.dragging { opacity: 0.25; cursor: grabbing; }
+
+.job.drop-above {
+  border-top: 2px solid var(--color-accent);
+  margin-top: -2px;
+}
+
+.job.drop-below {
+  border-bottom: 2px solid var(--color-accent);
+  margin-bottom: -2px;
+}
+
+.note-item.drop-above {
+  border-top: 2px solid var(--color-accent);
+  margin-top: -2px;
+}
+
+.note-item.drop-below {
+  border-bottom: 2px solid var(--color-accent);
+  margin-bottom: -2px;
+}
+
+/* ── Sidebar search ── */
+.sidebar-search {
+  border-top: 1px solid var(--border-color);
+  padding: 4px var(--space-3);
+  flex-shrink: 0;
+}
+.sidebar-search input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  padding: 2px 8px;
+}
+.sidebar-search input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.sidebar-search input::placeholder {
+  color: var(--text-muted);
+}

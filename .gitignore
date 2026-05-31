@@ -1,0 +1,15 @@
+# Xojo build output
+src/Builds - XMCPStudio/
+
+# Xojo IDE state
+src/.XMCPStudio.xojo_uistate
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Claude Code local settings
+.claude/
+
+# Xojo debug build output
+src/*.debug.app/

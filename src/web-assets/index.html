@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XMCPStudio</title>
+  <!-- CSS_PLACEHOLDER -->
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Left sidebar ─────────────────────── -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">XMCPStudio</span>
+    </div>
+
+    <!-- Jobs -->
+    <div class="sidebar-section" style="flex: 1; min-height: 0;">
+      <div class="sidebar-section-header">
+        <h3>Jobs</h3>
+        <button class="add-button" onclick="openNewJobModal()" title="New job">+</button>
+      </div>
+      <div class="sidebar-list" id="jobList"></div>
+      <div class="sidebar-search">
+        <input type="text" id="jobSearch" placeholder="Search jobs…" oninput="filterJobs(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chat column ─────────────────────── -->
+  <div class="chat-column">
+    <div class="chat-area" id="chatArea"></div>
+
+    <!-- Input -->
+    <div class="input-area" id="inputArea">
+      <textarea
+        id="inputText"
+        placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
+        onkeydown="handleTextareaKeydown(event)"
+        oninput="handleTextareaInput(event)"
+      ></textarea>
+      <div class="input-toolbar">
+        <div class="toolbar-left">
+          <button class="toolbar-icon" onclick="clearChat()" title="Clear conversation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M3 21v-5h5"/>
+            </svg>
+          </button>
+          <button class="toolbar-icon toolbar-text-btn" id="slashMenuBtn" onclick="toggleSlashMenu(event)" title="Slash commands">/</button>
+          <button class="toolbar-icon toolbar-text-btn" onclick="pickFile()" title="Attach file">+</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="toolbar-icon stop-icon" id="stopBtn" onclick="stopGeneration()" title="Stop" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12" rx="2"/>
+            </svg>
+          </button>
+          <div id="toolbarActions"></div>
+          <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backend status bar -->
+    <div class="status-bar">
+      <div class="status-dot disconnected" id="backendDot"></div>
+      <select class="status-select" id="backendSelect" onchange="postToXojo('setBackend', {backend: this.value})">
+        <option value="Claude Code">Claude Code</option>
+      </select>
+      <span class="status-badge" id="backendBadge" style="display:none;">chat only</span>
+      <span class="status-spacer"></span>
+      <span class="status-project" id="projectInfo"></span>
+      <select class="status-select" id="modelSelect">
+        <option value="claude-sonnet-4-6">Sonnet 4.6</option>
+      </select>
+      <select class="status-select" id="modeSelect" onchange="postToXojo('setMode', {mode: this.value})">
+        <option value="auto">Edit automatically</option>
+        <option value="ask" selected>Ask before edits</option>
+        <option value="plan">Plan mode</option>
+      </select>
+      <select class="status-select" id="approvalSelect" style="display:none" onchange="postToXojo('setApprovalMode', {mode: this.value})">
+        <option value="ask" selected>Ask before commands</option>
+        <option value="auto">Allow all</option>
+      </select>
+      <select class="status-select" id="effortSelect" style="display:none" onchange="postToXojo('setEffort', {effort: this.value})">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+      <select class="status-select" id="themeSelect" onchange="postToXojo('setTheme', {theme: this.value}); applyTheme(this.value)" title="Color theme">
+        <option value="system" selected>System theme</option>
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Right panel ──────────────────────── -->
+  <div class="notes-panel">
+    <!-- Sessions -->
+    <div class="sidebar-section" style="flex: 0 1 40%; min-height: 0; overflow: hidden;">
+      <div class="sidebar-section-header">
+        <h3>Sessions</h3>
+        <button class="add-button" onclick="newSession()" title="New session">+</button>
+      </div>
+      <div class="sidebar-list" id="sessionList"></div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Notes -->
+    <div class="sidebar-section" style="flex: 1; min-height: 0;">
+      <div class="sidebar-section-header">
+        <h3>Notes</h3>
+        <button class="add-button" onclick="postToXojo('openNote', {id:0,title:'',body:'',tags:'',description:'',scope:'global'})" title="New note">+</button>
+      </div>
+      <div class="sidebar-list" id="notesList"></div>
+      <div class="sidebar-search">
+        <input type="text" id="noteSearch" placeholder="Search notes…" oninput="filterNotes(this.value)">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- JS_PLACEHOLDER -->
+</body>
+</html>
