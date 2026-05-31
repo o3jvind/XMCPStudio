@@ -147,6 +147,7 @@ Inherits AIFrontend
 		  Var first As Boolean = True
 		  For i = 0 To limit - 1
 		    Var f As FolderItem = files(i)
+		    If f = Nil Then Continue
 		    Var uuid As String = f.Name
 		    If uuid.Right(6) = ".jsonl" Then uuid = uuid.Left(uuid.Length - 6)
 		    
