@@ -174,8 +174,8 @@ Inherits AIFrontend
 		      Try
 		        pItem = New JSONItem(pLine)
 		      Catch e As JSONException
-		        Continue
 		      End Try
+		      If pItem = Nil Then Continue
 		      Var pType As String = pItem.Lookup("type", "")
 		      If pType = "ai-title" Then
 		        title = pItem.Lookup("aiTitle", "")
