@@ -86,7 +86,7 @@ XMCPStudio itself is the **chat cockpit**: chat UI, AI backend management, the j
 
 1. Clone the repo.
 2. Open `src/XMCPStudio.xojo_project` in the XOJO IDE.
-3. Register the MBS plugin. XMCPStudio reads the MBS serial from the macOS keychain at startup (`App.Opening` → `RegisterMBSPlugin` — see `Secrets.xojo_code`). In debug builds, secrets are always read from the keychain. In release builds, the secrets are burned into `SecretsBuiltin.xojo_code` at build time and the stub is restored immediately after — so credentials are never stored in the repo.
+3. Register the MBS plugin. XMCPStudio reads the MBS serial from the macOS keychain at startup (`App.Opening` → `RegisterMBSPlugin` — see `Secrets.xojo_code`). In debug builds, secrets are always read from the keychain. In release builds, run `./inject-secrets.sh` before building — this writes your MBS credentials into `SecretsBuiltin.xojo_code` on disk. Run `./restore-secrets.sh` immediately after the build to restore the empty stub. While injected, the credentials are in the file on disk and must not be committed, synced, or backed up.
 
    Add your four MBS license values to the keychain once:
 
