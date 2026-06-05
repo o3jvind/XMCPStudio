@@ -425,16 +425,23 @@ Implements WS.WSClientDelegate
 		      Var seType As String = seEvent.Lookup("type", "")
 		      If seType = "content_block_delta" And seEvent.HasName("delta") Then
 		        Var delta As JSONItem = seEvent.Value("delta")
-		        If delta.Lookup("type", "") = "text_delta" Then
+		        Var deltaType As String = delta.Lookup("type", "")
+		        If deltaType = "text_delta" Then
 		          Var token As String = delta.Lookup("text", "")
 		          If token <> "" Then
 		            mStreamedText = True
 		            FireOnToken(token)
 		          End If
+		        ElseIf deltaType = "input_json_delta" Then
+		          mActiveToolInputJSON = mActiveToolInputJSON + delta.Lookup("partial_json", "")
 		        End If
 		      ElseIf seType = "content_block_start" And seEvent.HasName("content_block") Then
 		        Var cb As JSONItem = seEvent.Value("content_block")
-		        If cb.Lookup("name", "") = "ExitPlanMode" Then
+		        Var cbName As String = cb.Lookup("name", "")
+		        Var cbType As String = cb.Lookup("type", "")
+		        If cbType = "thinking" Then
+		          mDelegate.ShowThinkingIndicator("Thinking…")
+		        ElseIf cbName = "ExitPlanMode" Then
 		          Var isTopLevel As Boolean = True
 		          If root.HasName("parent_tool_use_id") Then
 		            Var pVal As Variant = root.Value("parent_tool_use_id")
@@ -448,6 +455,19 @@ Implements WS.WSClientDelegate
 		          Else
 		            System.DebugLog("ClaudeCodeBackend: ExitPlanMode ignored — inside subagent")
 		          End If
+		        ElseIf cb.Lookup("type", "") = "tool_use" And cbName <> "" And cbName <> "EnterPlanMode" Then
+		          mActiveToolName = cbName
+		          mActiveToolInputJSON = ""
+		          mDelegate.ShowToolActivity(cbName, "")
+		        End If
+		      ElseIf seType = "content_block_stop" Then
+		        If mActiveToolName <> "" Then
+		          If mActiveToolInputJSON <> "" Then
+		            Var detail As String = ExtractToolDetail(mActiveToolName, mActiveToolInputJSON)
+		            If detail <> "" Then mDelegate.ShowToolActivity(mActiveToolName, detail)
+		          End If
+		          // Keep activity visible — tool is now running; cleared on next token
+		          mActiveToolInputJSON = ""
 		        End If
 		      End If
 		    End If
@@ -457,6 +477,8 @@ Implements WS.WSClientDelegate
 
 		  Case "result"
 		    mStreamedText = False
+		    mActiveToolName = ""
+		    mActiveToolInputJSON = ""
 		    FireOnDone()
 		    If root.Lookup("subtype", "") = "error" Then
 		      FireOnError(root.Lookup("result", ""))
@@ -539,6 +561,20 @@ Implements WS.WSClientDelegate
 		    End If
 		    
 		  Case "rate_limit_event"
+		    Var rlInfo As JSONItem = root.Lookup("rate_limit_info", Nil)
+		    If rlInfo <> Nil And rlInfo.Lookup("status", "") = "rejected" Then
+		      Var usingOverage As Boolean = rlInfo.Lookup("isUsingOverage", False)
+		      If Not usingOverage Then
+		        Var resetsAt As Int64 = rlInfo.Lookup("resetsAt", 0)
+		        Var waitMsg As String = "Rate limit reached — waiting for reset"
+		        If resetsAt > 0 Then
+		          Var d As New Date(1970, 1, 1, 0, 0, 0)
+		          d.TotalSeconds = d.TotalSeconds + resetsAt
+		          waitMsg = "Rate limit reached — resets at " + Format(d.Hour, "00") + ":" + Format(d.Minute, "00")
+		        End If
+		        mDelegate.ShowToolActivity("rate_limit", waitMsg)
+		      End If
+		    End If
 		    
 		  End Select
 		End Sub
@@ -676,6 +712,9 @@ Implements WS.WSClientDelegate
 		  args.Add("stream-json")
 		  args.Add("--verbose")
 		  args.Add("--ide")
+		  args.Add("--thinking")
+		  args.Add("disabled")
+		  args.Add("--include-partial-messages")
 		  If mModel <> "" Then
 		    args.Add("--model")
 		    args.Add(mModel)
@@ -1084,6 +1123,55 @@ Implements WS.WSClientDelegate
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function ExtractToolDetail(toolName As String, inputJSON As String) As String
+		  Var j As JSONItem
+		  Try
+		    j = New JSONItem(inputJSON)
+		  Catch
+		    Return ""
+		  End Try
+		  
+		  Select Case toolName
+		  Case "str_replace_based_edit_tool", "create_file", "write_file", "view_file", "read_file", "delete_file"
+		    Var p As String = j.Lookup("path", "")
+		    If p = "" Then p = j.Lookup("file_path", "")
+		    Return If(p <> "", LastPathComponent(p), "")
+		  Case "Bash", "bash", "shell", "computer"
+		    Var cmd As String = j.Lookup("command", "")
+		    If cmd = "" Then cmd = j.Lookup("input", "")
+		    If cmd.Length > 60 Then cmd = cmd.Left(57) + "…"
+		    Return cmd
+		  Case "WebSearch", "web_search"
+		    Return j.Lookup("query", "")
+		  Case "WebFetch", "web_fetch"
+		    Var url As String = j.Lookup("url", "")
+		    If url.Length > 60 Then url = url.Left(57) + "…"
+		    Return url
+		  Case "TodoWrite", "TodoRead"
+		    Return ""
+		  Else
+		    Return ""
+		  End Select
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function LastPathComponent(path As String) As String
+		  Var parts() As String = path.Split("/")
+		  Var last As String = parts(parts.LastRowIndex)
+		  Return If(last <> "", last, path)
+		End Function
+	#tag EndMethod
+
+
+	#tag Property, Flags = &h21
+		Private mActiveToolInputJSON As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mActiveToolName As String
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mAuthToken As String

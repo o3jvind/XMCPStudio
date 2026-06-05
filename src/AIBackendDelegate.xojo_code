@@ -37,6 +37,10 @@ Protected Interface AIBackendDelegate
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub ShowThinkingIndicator(label As String)
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub ShowUserMessage(text As String)
 	#tag EndMethod
 

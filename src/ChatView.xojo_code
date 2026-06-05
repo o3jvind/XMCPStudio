@@ -494,6 +494,12 @@ Implements AIBackendDelegate
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub ShowThinkingIndicator(label As String)
+		  Me.EvaluateJavaScript("showThinkingIndicator(" + DBHelper.JSONEscape(label) + ");")
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub ShowUserMessage(text As String)
 		  Me.EvaluateJavaScript("showUserMessage(" + DBHelper.JSONEscape(text) + ");")
 		End Sub

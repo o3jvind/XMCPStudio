@@ -186,8 +186,7 @@ function _removeToolActivity() {
 }
 
 function showError(msg) {
-  _streamingEl = null;
-  _streamingRaw = '';
+  _sealStreamingBubble();
   const el = document.createElement('div');
   el.className = 'message assistant';
   el.innerHTML = sanitizeHTML(marked.parse(msg)) + buildMessageActions(msg);
@@ -212,17 +211,24 @@ function appendToken(token) {
   scrollChatToBottom();
 }
 
+function _sealStreamingBubble() {
+  if (_streamingEl && _streamingRaw !== '') {
+    const html = marked.parse(_streamingRaw);
+    _streamingEl.innerHTML = sanitizeHTML(html) + buildMessageActions(_streamingRaw);
+    tagIfCollapsible(_streamingEl);
+    _streamingEl = null;
+    _streamingRaw = '';
+  } else if (_streamingEl) {
+    _streamingEl.remove();
+    _streamingEl = null;
+    _streamingRaw = '';
+  }
+}
+
 function finalizeMessage() {
   hideThinkingIndicator();
   _removeToolActivity();
-  if (_streamingEl) {
-    const html = marked.parse(_streamingRaw);
-    _streamingEl.innerHTML = sanitizeHTML(html) + buildMessageActions(_streamingRaw);
-    const finalized = _streamingEl;
-    _streamingEl = null;
-    _streamingRaw = '';
-    tagIfCollapsible(finalized);
-  }
+  _sealStreamingBubble();
   AppState.generating = false;
   updateGeneratingUI(false);
   scrollChatToBottom();
@@ -298,8 +304,40 @@ function showDiff(requestId, filePath, oldContent, newContent) {
 }
 
 function showToolActivity(toolName, detail) {
-  const icons = { openDiff: '✏️', openFile: '📄', getWorkspaceFolders: '📁', getCurrentSelection: '🖊' };
+  const icons = {
+    // IDE bridge tools
+    openDiff: '✏️', openFile: '📄', getWorkspaceFolders: '📁', getCurrentSelection: '🖊',
+    // File operations
+    str_replace_based_edit_tool: '✏️', create_file: '📄', write_file: '📄',
+    read_file: '📖', view_file: '📖', delete_file: '🗑️',
+    // Shell / computer
+    Bash: '⚡', bash: '⚡', shell: '⚡', computer: '🖥️',
+    // Web
+    WebSearch: '🔍', web_search: '🔍', WebFetch: '🌐', web_fetch: '🌐',
+    // Tasks / misc
+    task: '⚙️', TodoWrite: '📝', TodoRead: '📝',
+    rate_limit: '⏳',
+  };
+  const labels = {
+    str_replace_based_edit_tool: 'Editing file',
+    create_file: 'Creating file', write_file: 'Writing file',
+    read_file: 'Reading file', view_file: 'Reading file', delete_file: 'Deleting file',
+    Bash: 'Running command', bash: 'Running command', shell: 'Running command',
+    computer: 'Using computer',
+    WebSearch: 'Searching the web', web_search: 'Searching the web',
+    WebFetch: 'Fetching page', web_fetch: 'Fetching page',
+    task: 'Working',
+    TodoWrite: 'Updating task list', TodoRead: 'Reading task list',
+    rate_limit: 'Waiting for rate limit',
+    openDiff: 'Opening diff', openFile: 'Opening file',
+    getWorkspaceFolders: 'Getting workspace path', getCurrentSelection: 'Getting selection',
+  };
   const icon = icons[toolName] || '🔧';
+  const label = labels[toolName] || toolName;
+  const displayText = detail ? `${label}: ${detail}` : label;
+
+  _sealStreamingBubble();
+
   if (!_toolActivityEl) {
     _toolActivityEl = document.createElement('div');
     _toolActivityEl.className = 'tool-activity';
@@ -311,7 +349,7 @@ function showToolActivity(toolName, detail) {
     document.getElementById('chatArea').appendChild(_toolActivityEl);
   }
   _toolActivityEl.querySelector('.tool-activity-icon').textContent = icon;
-  _toolActivityEl.querySelectorAll('span')[1].textContent = detail || toolName;
+  _toolActivityEl.querySelectorAll('span')[1].textContent = displayText;
   scrollChatToBottom();
 }
 

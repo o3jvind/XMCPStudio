@@ -321,6 +321,8 @@ Protected Class AIBackend
 		  If n = 0 Then
 		    System.DebugLog("AIBackend: stdout EOF — process exited")
 		    mStdoutFD = -1
+		    FireOnError("Claude Code exited unexpectedly.")
+		    FireOnDone()
 		    Return
 		  End If
 		  If n > 0 Then
