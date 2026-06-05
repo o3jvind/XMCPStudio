@@ -2,11 +2,18 @@
 
 All notable changes to XMCPStudio will be documented here.
 
+## [Unreleased]
+
+### Improved
+
+- Claude Code backend gives better feedback during long-running sessions
+
 ## [0.1.0] — 2026-06-01
 
 Initial public release.
 
 ### Added
+
 - Streaming chat UI with Markdown rendering, bubble collapse, and copy buttons
 - Claude Code backend (subprocess + stream-json + WebSocket IDE bridge)
 - Codex backend (JSON-RPC 2.0 over stdio, `app-server` protocol)
