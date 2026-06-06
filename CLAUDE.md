@@ -18,6 +18,12 @@ XMCPStudio is a macOS desktop app (XOJO) that serves as an AI-assisted cockpit f
 
 **Required plugins**: MBS XOJO Plugin — `DesktopWKWebViewControlMBS` / `WKFrameInfoMBS` (chat and editor WebViews), `NSTaskMBS` / `NSPipeMBS` (AI backend subprocess launch and stdio piping).
 
+**Build automation**: `Build Automation.xojo_code` includes two macOS build steps that automatically copy `web-assets/` and `template-db/xmcpstudio_template.sqlite` into the app bundle. No manual copy needed after editing those directories.
+
+**Release builds / secrets injection**: Run `./inject-secrets.sh` before building in the IDE, then `./restore-secrets.sh` immediately after. If the project was already open when you injected, right-click `SecretsBuiltin` in the Navigator → **Revert to Disk** before building. See `README.md` for the full workflow and keychain setup commands.
+
+**Debug log**: `App.AppendDebugLog` writes to `~/Library/Application Support/<bundle-id>/<bundle-id>_debug.log` (bundle-id dots replaced with underscores). `App.UnhandledException` routes there automatically.
+
 ## Source Layout
 
 ```text
@@ -46,6 +52,8 @@ src/
   NoteEditorWindow.xojo_window     — native note editor (edit/split/preview)
   JobEditorWindow.xojo_window      — native job editor (mirror of NoteEditorWindow)
   HelpWindow.xojo_window           — help viewer (DesktopWKWebViewControlMBS, loads web-assets/help/)
+  ProjectPickerWindow.xojo_window  — shown when folder contains multiple .xojo_project files
+  MainMenuBar.xojo_menu            — menu bar definition (File, Edit, Project, Help)
   template-db/
     xmcpstudio_template.sqlite     — schema + 3 global starter notes; copied to App Support on first run
   web-assets/
@@ -68,6 +76,9 @@ src/
       job-editor.js                — job editor bridge
       vendor/
         marked.min.js              — Markdown rendering (bundled; CDN blocked by WKWebView)
+    help/
+      help.css                     — styles for HelpWindow content
+      help.js                      — JS for HelpWindow (loaded by HelpWindow.xojo_window)
 ```
 
 ## Key Architectural Rules
